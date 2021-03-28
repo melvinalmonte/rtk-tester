@@ -5,6 +5,7 @@ import { Button } from "@chakra-ui/button";
 import { Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/table";
 import { loadUsers } from "./redux/userSlice";
 import { AiOutlinePlus, AiOutlineMinus } from "react-icons/ai";
+import { CgMoon, CgSun } from "react-icons/cg";
 import {
   Stat,
   StatArrow,
@@ -12,9 +13,30 @@ import {
   StatLabel,
   StatNumber,
 } from "@chakra-ui/stat";
-import { decrement, increment } from "./redux/counterSlice";
+import {
+  decrement,
+  decrementByAmount,
+  increment,
+  incrementByAmount,
+} from "./redux/counterSlice";
+import { FormControl } from "@chakra-ui/form-control";
+import { FormLabel } from "@chakra-ui/form-control";
+import { Input } from "@chakra-ui/input";
+import { useColorMode } from "@chakra-ui/color-mode";
+import { IconButton } from "@chakra-ui/button";
 
-function App({ loading, userData, loadUsers, count, decrement, increment }) {
+function App({
+  loading,
+  userData,
+  loadUsers,
+  count,
+  decrement,
+  increment,
+  incrementByAmount,
+  decrementByAmount,
+}) {
+  const [increaseBy, setIncreaseBy] = React.useState(0);
+  const { colorMode, toggleColorMode } = useColorMode();
   return (
     <Box p={3}>
       <VStack spacing={3}>
@@ -28,20 +50,42 @@ function App({ loading, userData, loadUsers, count, decrement, increment }) {
               {userData.length > 0 ? "Reload" : "Load"}
             </Button>
             <Button
-              onClick={() => increment()}
+              onClick={() =>
+                increaseBy !== 0 ? incrementByAmount(increaseBy) : increment()
+              }
               colorScheme="green"
               leftIcon={<AiOutlinePlus />}
             >
-              Increase Counter{" "}
+              {increaseBy !== 0
+                ? `Increase counter by ${increaseBy}`
+                : "Increase Counter"}
             </Button>
             <Button
-              onClick={() => decrement()}
+              onClick={() =>
+                increaseBy !== 0 ? decrementByAmount(increaseBy) : decrement()
+              }
               colorScheme="red"
               leftIcon={<AiOutlineMinus />}
             >
-              Decrease Counter
+              {increaseBy !== 0
+                ? `Decrease counter by ${increaseBy}`
+                : "Decrease Counter"}
             </Button>
+            <IconButton
+              onClick={() => toggleColorMode()}
+              icon={colorMode === "light" ? <CgMoon /> : <CgSun />}
+            />
           </HStack>
+        </Box>
+        <Box w="100%">
+          <FormControl>
+            <FormLabel>Increase/Decrease count by:</FormLabel>
+            <Input
+              w="10%"
+              type="number"
+              onChange={(e) => setIncreaseBy(e.target.valueAsNumber)}
+            />
+          </FormControl>
         </Box>
         <Box w="100%">
           <Stat>
@@ -54,6 +98,7 @@ function App({ loading, userData, loadUsers, count, decrement, increment }) {
             </StatHelpText>
           </Stat>
         </Box>
+
         {loading ? (
           <Box w="100%">
             {" "}
@@ -99,6 +144,12 @@ const mapStateToProps = (state) => ({
   userData: state.users.data,
 });
 
-const mapDispatchToProps = { loadUsers, decrement, increment };
+const mapDispatchToProps = {
+  loadUsers,
+  decrement,
+  increment,
+  incrementByAmount,
+  decrementByAmount,
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
